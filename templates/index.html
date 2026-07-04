@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TTS Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0}
+body{font:15px/1.6 'Inter',system-ui,sans-serif;background:#f1f5f9;padding:24px;max-width:960px;margin:auto;color:#1e293b}
+h1{margin-bottom:2px;font-weight:700;letter-spacing:-.02em}
+.sub{font-size:13px;color:#64748b;margin-bottom:16px}
+.tabs{display:flex;gap:4px;margin-bottom:0}
+.tabs button{padding:9px 22px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;border-radius:8px 8px 0 0;font-size:14px;font-weight:500;color:#64748b;transition:all .2s}
+.tabs button:hover{background:#eef2f6}
+.tabs button.active{background:#fff;border-bottom-color:#fff;color:#1e293b}
+.panel{display:none;background:#fff;border:1px solid #e2e8f0;padding:24px;border-radius:0 8px 8px 8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.panel.active{display:block}
+label{display:block;margin:12px 0 4px;font-weight:600;font-size:13px;color:#475569}
+input,textarea,select{width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:6px;font:inherit;transition:border-color .15s,box-shadow .15s;background:#fff}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+textarea{resize:vertical;min-height:120px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;line-height:1.5}
+.row{display:flex;gap:12px}
+.row>*{flex:1}
+.btn{position:relative;padding:9px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s;overflow:hidden}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#6366f1;color:#fff}
+.btn-primary:hover{background:#4f46e5}
+.btn-primary:disabled{background:#a5b4fc;cursor:not-allowed;transform:none}
+.btn-green{background:#10b981;color:#fff}
+.btn-green:hover{background:#059669}
+.btn-green:disabled{background:#6ee7b7;cursor:not-allowed;transform:none}
+.btn-amber{background:#f59e0b;color:#fff}
+.btn-amber:hover{background:#d97706}
+.btn-amber:disabled{background:#fcd34d;cursor:not-allowed;transform:none}
+.btn-outline{background:transparent;border:1px solid #d1d5db;color:#475569}
+.btn-outline:hover{background:#f1f5f9}
+.btn-outline:active{background:#e2e8f0}
+.btn-sm{padding:5px 12px;font-size:12px}
+#log{margin-top:16px;background:#1e293b;color:#34d399;padding:14px;border-radius:8px;font:13px/1.6 'JetBrains Mono',ui-monospace,monospace;max-height:260px;overflow-y:auto;white-space:pre-wrap}
+#log a{color:#93c5fd}
+#log::-webkit-scrollbar{width:5px}
+#log::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
+
+/* Loading spinner */
+.spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+.btn.loading .spinner{display:inline-block}
+.btn.loading .btn-label{opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Settings toggle */
+.settings-toggle{font-size:13px;color:#64748b;cursor:pointer;margin-bottom:8px;display:inline-block;transition:color .15s}
+.settings-toggle:hover{color:#334155}
+.settings-panel{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:16px;display:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.03)}
+.settings-panel.open{display:block}
+.settings-panel .row{margin-bottom:0}
+.settings-panel label{margin-top:0;font-weight:500}
+
+/* Novel bar */
+.novel-bar{display:flex;gap:8px;margin-bottom:14px;align-items:end}
+.novel-bar input{flex:1}
+
+/* Chapter grid */
+.chapter-grid{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;font-size:13px;cursor:pointer;user-select:none;border:1px solid #e2e8f0;background:#fff;transition:all .15s}
+.chip:hover{border-color:#94a3b8;background:#f8fafc}
+.chip.done{background:#ecfdf5;border-color:#6ee7b7;color:#065f46}
+.chip.selected{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}
+.chip input{display:none}
+.chip .num{font-weight:600}
+.chip .badge{font-size:10px;color:#6b7280;margin-left:2px}
+.chapter-form{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin-top:10px}
+.empty-state{color:#94a3b8;padding:24px 0;text-align:center;font-size:14px}
+
+/* Compile creds preview */
+.cred-preview{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px;margin:8px 0;font-size:13px;line-height:1.6;color:#166534}
+
+/* Fade transition for panels */
+.panel{animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<h1>📖 TTS Forge</h1>
+<div class="sub">Light Novel TTS Generator</div>
+
+<span class="settings-toggle" onclick="toggleSettings()">⚙️ Settings</span>
+<div id="settingsPanel" class="settings-panel">
+  <div class="row">
+    <div><label>Author</label><input id="sAuthor" placeholder="Author name"></div>
+    <div><label>Translated by</label><input id="sTranslator" placeholder="Translator name"></div>
+    <div><label>Audiobook by</label><input id="sAudiobookBy" placeholder="Your name"></div>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="saveSettings()" style="margin-top:8px">Save Settings</button>
+  <span id="sSaved" style="font-size:12px;color:#10b981;margin-left:8px;display:none">✓ Saved</span>
+</div>
+
+<div class="tabs">
+  <button class="active" onclick="switchTab('generate')">Generate TTS</button>
+  <button onclick="switchTab('compile')">Compile Volume</button>
+</div>
+
+<div id="panel-generate" class="panel active">
+  <div class="novel-bar">
+    <input id="newNovel" placeholder="New light novel name..." onkeydown="if(event.key==='Enter')addNovel()">
+    <button class="btn btn-primary" onclick="addNovel()">+ Add Novel</button>
+  </div>
+  <label>Select Novel</label>
+  <select id="novelSelect" onchange="onNovelChange()">
+    <option value="">— Select a novel —</option>
+  </select>
+  <div id="chaptersArea" style="display:none">
+    <label>Chapters <span id="novelTitle" style="font-weight:400"></span></label>
+    <div id="chapterList" class="chapter-grid"></div>
+    <div class="chapter-form">
+      <div class="row">
+        <div style="flex:0 0 100px"><label>Chapter #</label><input id="newChapterNum" type="number" min="1" value="1"></div>
+        <div><label>Voice</label>
+          <select id="voice">
+            <option value="en-US-AriaNeural">Aria (US English)</option>
+            <option value="en-US-GuyNeural">Guy (US English)</option>
+            <option value="en-US-JennyNeural">Jenny (US English)</option>
+            <option value="en-US-ChristopherNeural">Christopher (US English)</option>
+            <option value="en-GB-SoniaNeural">Sonia (UK English)</option>
+            <option value="en-GB-RyanNeural">Ryan (UK English)</option>
+            <option value="ja-JP-NanamiNeural">Nanami (Japanese)</option>
+            <option value="ja-JP-KeitaNeural">Keita (Japanese)</option>
+            <option value="zh-CN-XiaoxiaoNeural">Xiaoxiao (Chinese)</option>
+            <option value="ko-KR-SunHiNeural">SunHi (Korean)</option>
+            <option value="fr-FR-DeniseNeural">Denise (French)</option>
+            <option value="de-DE-KatjaNeural">Katja (German)</option>
+          </select>
+        </div>
+        <div><label>Style / Emotion</label>
+          <select id="style">
+            <option value="none">None</option>
+            <option value="cheerful">Cheerful</option><option value="empathetic">Empathetic</option>
+            <option value="excited">Excited</option><option value="friendly">Friendly</option>
+            <option value="sad">Sad</option><option value="angry">Angry</option>
+            <option value="whispering">Whispering</option><option value="shouting">Shouting</option>
+            <option value="serious">Serious</option>
+          </select>
+        </div>
+      </div>
+      <label>Chapter Text</label>
+      <textarea id="chapterText" placeholder="Paste chapter text here..."></textarea>
+      <button id="generateBtn" class="btn btn-green" onclick="generateTts()" style="margin-top:10px"><span class="btn-label">⚡ Generate</span><span class="spinner"></span></button>
+    </div>
+  </div>
+</div>
+
+<div id="panel-compile" class="panel">
+  <label>Select Novel</label>
+  <select id="compileNovelSelect" onchange="onCompileNovelChange()">
+    <option value="">— Select a novel —</option>
+  </select>
+  <div id="compileArea" style="display:none">
+    <label>Select Chapters to Include</label>
+    <div id="compileChapterList" class="chapter-grid"></div>
+    <p id="selectionCount" style="font-size:12px;color:#64748b;margin-bottom:8px">0 chapters selected</p>
+
+    <div style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:4px">
+      <div class="row">
+        <div><label>Author</label><input id="cAuthor" placeholder="Author name"></div>
+        <div><label>Translated by</label><input id="cTranslator" placeholder="Translator name"></div>
+        <div><label>Audiobook by</label><input id="cAudiobookBy" placeholder="Your name"></div>
+      </div>
+      <div id="credPreview" class="cred-preview">Fill in at least author or name to generate intro.</div>
+    </div>
+
+    <div class="row" style="align-items:end;margin-top:10px">
+      <div style="flex:0 0 120px"><label>Volume #</label><input id="volumeNum" type="number" min="1" value="1"></div>
+      <div><button id="compileBtn" class="btn btn-amber" onclick="compileVolume()" style="margin-top:22px"><span class="btn-label">🎬 Compile to AAC</span><span class="spinner"></span></button></div>
+    </div>
+    <div id="existingVolumes" style="margin-top:8px;font-size:13px;color:#64748b"></div>
+  </div>
+</div>
+
+<div id="log">Ready.</div>
+
+<script>
+// ── State ──
+let novels = [], settings = {};
+
+// ── Tabs ──
+function switchTab(name) {
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tabs button:nth-child(${name==='generate'?1:2})`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+  refresh();
+}
+
+function log(msg) {
+  const el=document.getElementById('log');
+  const ts=new Date().toLocaleTimeString();
+  el.innerHTML+=`<span style="color:#64748b">${ts}</span> ${msg}\n`;
+  el.scrollTop=el.scrollHeight;
+}
+
+// ── Loading state ──
+function setLoading(btnId,loading) {
+  const btn=document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled=loading;
+  btn.classList.toggle('loading',loading);
+}
+
+// ── Settings ──
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+async function loadSettings() {
+  const res=await fetch('/api/settings');
+  settings=await res.json();
+  document.getElementById('sAuthor').value=settings.author||'';
+  document.getElementById('sTranslator').value=settings.translator||'';
+  document.getElementById('sAudiobookBy').value=settings.audiobook_by||'';
+  document.getElementById('cAuthor').value=settings.author||'';
+  document.getElementById('cTranslator').value=settings.translator||'';
+  document.getElementById('cAudiobookBy').value=settings.audiobook_by||'';
+  updateCredPreview();
+}
+
+async function saveSettings() {
+  const data={
+    author: document.getElementById('sAuthor').value.trim(),
+    translator: document.getElementById('sTranslator').value.trim(),
+    audiobook_by: document.getElementById('sAudiobookBy').value.trim(),
+  };
+  await fetch('/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  settings=data;
+  document.getElementById('cAuthor').value=data.author;
+  document.getElementById('cTranslator').value=data.translator;
+  document.getElementById('cAudiobookBy').value=data.audiobook_by;
+  updateCredPreview();
+  const el=document.getElementById('sSaved');el.style.display='inline';
+  setTimeout(()=>el.style.display='none',2000);
+  log('⚙️ Settings saved');
+}
+
+function updateCredPreview() {
+  const novel=document.getElementById('compileNovelSelect').value;
+  const author=document.getElementById('cAuthor').value.trim();
+  const tr=document.getElementById('cTranslator').value.trim();
+  const ab=document.getElementById('cAudiobookBy').value.trim();
+  let parts=[];
+  if(novel) parts.push(novel);
+  if(author) parts.push('Author: '+author);
+  if(tr) parts.push('Translated by '+tr);
+  if(ab) parts.push('Audiobook by '+ab);
+  const el=document.getElementById('credPreview');
+  if(parts.length>1) el.textContent='🎙️ "'+parts.join('. ')+'."';
+  else if(parts.length===1) el.textContent='🎙️ "'+parts[0]+'".';
+  else el.textContent='Fill in at least author or name to generate intro.';
+}
+
+// ── Novels ──
+async function refresh() {
+  const res=await fetch('/api/novels');
+  novels=await res.json();
+  renderNovelDropdowns();renderChapterList();renderCompileList();
+}
+
+function renderNovelDropdowns() {
+  const sel=document.getElementById('novelSelect');
+  const cs=document.getElementById('compileNovelSelect');
+  const cur=sel.value,cur2=cs.value;
+  const opts=n=>`${n.name} (${n.chapters.length} ch)`;
+  sel.innerHTML='<option value="">— Select a novel —</option>'+novels.map(n=>`<option value="${n.name}">${opts(n)}</option>`).join('');
+  cs.innerHTML='<option value="">— Select a novel —</option>'+novels.map(n=>`<option value="${n.name}">${opts(n)}</option>`).join('');
+  if(novels.find(n=>n.name===cur)) sel.value=cur;
+  if(novels.find(n=>n.name===cur2)) cs.value=cur2;
+  onNovelChange();onCompileNovelChange();
+}
+
+async function addNovel() {
+  const input=document.getElementById('newNovel');
+  const name=input.value.trim();
+  if(!name){log('❌ Enter a novel name');return}
+  await fetch('/api/novel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+  input.value='';
+  log(`📁 Novel "${name}" created`);
+  await refresh();
+  document.getElementById('novelSelect').value=name;
+  onNovelChange();
+}
+
+// ── Generate ──
+function onNovelChange() {
+  const name=document.getElementById('novelSelect').value;
+  const area=document.getElementById('chaptersArea');
+  if(!name){area.style.display='none';return}
+  area.style.display='block';
+  document.getElementById('novelTitle').textContent='— '+name;
+  renderChapterList();
+}
+
+function renderChapterList() {
+  const name=document.getElementById('novelSelect').value;
+  const el=document.getElementById('chapterList');
+  if(!name){el.innerHTML='';return}
+  const n=novels.find(x=>x.name===name);
+  if(!n||!n.chapters.length){el.innerHTML='<div class="empty-state">No chapters yet. Add one below.</div>';return}
+  el.innerHTML=n.chapters.sort((a,b)=>a-b).map(ch=>`
+    <span class="chip done"><span class="num">Ch ${ch}</span><span class="badge">✓ FLAC</span></span>
+  `).join('');
+}
+
+async function generateTts() {
+  const name=document.getElementById('novelSelect').value;
+  const chapter=document.getElementById('newChapterNum').value;
+  const text=document.getElementById('chapterText').value.trim();
+  const voice=document.getElementById('voice').value;
+  const style=document.getElementById('style').value;
+  if(!name||!text){log('❌ Select novel + enter text');return}
+  setLoading('generateBtn',true);
+  log(`⏳ Generating ch ${chapter} of "${name}"${style!=='none'?' ['+style+']':''}...`);
+  try {
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({novel_name:name,chapter:parseInt(chapter),text,voice,style})});
+    const d=await res.json();
+    if(d.ok){log(`✅ Ch ${chapter} saved`);document.getElementById('chapterText').value='';document.getElementById('newChapterNum').value=parseInt(chapter)+1;await refresh()}
+    else log(`❌ ${d.error}`);
+  } catch(e) {
+    log(`❌ Network error: ${e.message}`);
+  } finally {
+    setLoading('generateBtn',false);
+  }
+}
+
+// ── Compile ──
+function onCompileNovelChange() {
+  const name=document.getElementById('compileNovelSelect').value;
+  const area=document.getElementById('compileArea');
+  if(!name){area.style.display='none';return}
+  area.style.display='block';
+  updateCredPreview();
+  renderCompileList();
+}
+
+function renderCompileList() {
+  const name=document.getElementById('compileNovelSelect').value;
+  const el=document.getElementById('compileChapterList');
+  const volEl=document.getElementById('existingVolumes');
+  if(!name){el.innerHTML='';volEl.textContent='';return}
+  const n=novels.find(x=>x.name===name);
+  if(!n||!n.chapters.length){el.innerHTML='<div class="empty-state">No chapters generated yet.</div>';volEl.textContent='';return}
+  volEl.textContent=n.volumes.length?`📚 Existing volumes: ${n.volumes.join(', ')}`:'No volumes yet';
+  el.innerHTML=n.chapters.sort((a,b)=>a-b).map(ch=>`
+    <label class="chip" onclick="this.classList.toggle('selected');updateCompileCount()">
+      <input type="checkbox" value="${ch}" onchange="this.parentElement.classList.toggle('selected')">
+      <span class="num">Ch ${ch}</span>
+    </label>
+  `).join('');
+  updateCompileCount();
+  updateCredPreview();
+}
+
+function updateCompileCount() {
+  const checked=document.querySelectorAll('#compileChapterList .chip.selected').length;
+  document.getElementById('selectionCount').textContent=checked+' chapters selected';
+}
+
+async function compileVolume() {
+  const name=document.getElementById('compileNovelSelect').value;
+  const vol=document.getElementById('volumeNum').value;
+  const selected=[...document.querySelectorAll('#compileChapterList .chip.selected')].map(el=>parseInt(el.querySelector('input').value));
+  if(!selected.length){log('❌ Select at least one chapter');return}
+  const author=document.getElementById('cAuthor').value.trim();
+  const translator=document.getElementById('cTranslator').value.trim();
+  const audiobook_by=document.getElementById('cAudiobookBy').value.trim();
+  setLoading('compileBtn',true);
+  log(`⏳ Compiling ${selected.length} chapters → AAC volume ${vol}...`);
+  try {
+    const res=await fetch('/api/compile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({novel_name:name,chapters:selected,volume_number:parseInt(vol),author,translator,audiobook_by})});
+    const d=await res.json();
+    if(d.ok){log(`✅ Volume ${vol} saved`);await refresh()}
+    else log(`❌ ${d.error}`);
+  } catch(e) {
+    log(`❌ Network error: ${e.message}`);
+  } finally {
+    setLoading('compileBtn',false);
+  }
+}
+
+// ── Init ──
+loadSettings();
+refresh();
+</script>
+</body>
+</html>
