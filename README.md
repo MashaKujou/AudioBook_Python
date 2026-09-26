@@ -59,7 +59,6 @@ TTS/
 │   └── {novel_name}/
 │       ├── chapters/       # 0001.flac, 0002.flac, ... (per-chapter FLAC)
 │       └── volumes/        # {novel}_vol1.aac (compiled audiobooks)
-├── .claude/                # Claude Code config (ignore)
 └── README.md
 ```
 
