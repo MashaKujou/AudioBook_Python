@@ -79,6 +79,45 @@ textarea{resize:vertical;min-height:120px;font-family:'JetBrains Mono',ui-monosp
 /* Fade transition for panels */
 .panel{animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Video studio */
+.vs-bar{display:flex;gap:8px;margin-bottom:14px;align-items:end}
+.vs-bar input{flex:1}
+.media-library{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px;min-height:40px}
+.media-thumb{width:76px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;cursor:grab}
+.timeline{position:relative;background:#1e293b;border-radius:10px;padding:8px;margin:8px 0}
+.media-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.media-group{margin-bottom:10px}
+.media-group-label{font-size:12px;font-weight:600;color:#475569;margin-bottom:4px}
+.slide-track{position:relative;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;flex:1;background:rgba(255,255,255,.03);border:1px dashed #475569;border-radius:8px;height:calc(150px*var(--hz,1));background-image:repeating-linear-gradient(to right,#334155 0 1px,transparent 1px 40px)}
+.slide-track::-webkit-scrollbar{display:none}
+.slide-card{position:absolute;top:calc(26px*var(--hz,1));height:calc(122px*var(--hz,1));background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:4px 6px;cursor:grab;user-select:none;overflow:hidden}
+.slide-thumb{width:100%;height:calc(72px*var(--hz,1));background-repeat:repeat;background-size:auto calc(72px*var(--hz,1));background-position:left top;border-radius:4px}
+.slide-dur{display:block;font-size:11px;color:#475569;font-weight:600;text-align:center;margin-top:3px}
+.slide-x{position:absolute;top:6px;right:9px;border:none;background:transparent;color:#64748b;cursor:pointer;font-size:12px;padding:0;z-index:2}
+.edge-handle{position:absolute;right:0;top:0;bottom:0;width:7px;cursor:ew-resize;background:linear-gradient(to right,transparent,#a5b4fc 50%)}
+.trans-pick{position:absolute;top:2px;width:64px;padding:2px 4px;font-size:10px;z-index:10;cursor:pointer}
+.audio-track{position:relative;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;border:1px dashed #475569;border-radius:8px;background:rgba(255,255,255,.03);background-image:repeating-linear-gradient(to right,#334155 0 1px,transparent 1px 40px)}
+.audio-track::-webkit-scrollbar{display:none}
+.audio-clip{position:absolute;top:6px;height:calc(44px*var(--hz,1));background:#2563eb;border:1px solid #1d4ed8;border-radius:6px;padding:3px 6px;cursor:grab;overflow:hidden;user-select:none}
+.audio-clip.dragging{opacity:.6;cursor:grabbing}
+.wave{position:absolute;left:4px;right:4px;top:calc(17px*var(--hz,1));bottom:calc(14px*var(--hz,1));z-index:0;pointer-events:none}
+.clip-info{position:absolute;top:3px;left:6px;right:18px;z-index:2;font-size:10px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip-name{color:#fff}
+.clip-time{color:rgba(255,255,255,.75)}
+.clip-vol{position:absolute;left:4px;bottom:calc(2px*var(--hz,1));width:55%;height:calc(12px*var(--hz,1));accent-color:#e0e7ff;cursor:pointer;padding:0;z-index:1}
+.fade-overlay{position:absolute;top:0;bottom:0;z-index:2;pointer-events:none}
+.fade-overlay.in{left:0;background:linear-gradient(to right,rgba(255,255,255,.92),transparent)}
+.fade-overlay.out{right:0;background:linear-gradient(to left,rgba(255,255,255,.92),transparent)}
+.fade-handle{position:absolute;top:0;width:10px;height:14px;z-index:3;cursor:ew-resize;background:rgba(255,255,255,.4);border-radius:3px}
+.fh-in{left:0}.fh-out{right:0}
+.clip-x{position:absolute;top:1px;right:2px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:11px;padding:0 2px;z-index:4}
+.slide-marker{position:absolute;top:0;height:100%;width:1px;background:#475569}
+.slide-marker span{position:absolute;top:2px;left:3px;font-size:9px;color:#94a3b8;white-space:nowrap}
+.vs-bottom-tools{display:flex;gap:6px;justify-content:flex-end;margin-top:6px}
+.tool-icon-round{width:28px;height:28px;border-radius:8px;background:#1e293b;border:1px solid #334155;color:#94a3b8;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.tool-icon-round:hover{color:#e2e8f0;border-color:#475569}
+.wave-overview{display:none;width:100%;height:40px;background:rgba(255,255,255,.05);border:1px dashed #475569;border-radius:8px;margin-bottom:8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -99,6 +138,7 @@ textarea{resize:vertical;min-height:120px;font-family:'JetBrains Mono',ui-monosp
 <div class="tabs">
   <button class="active" onclick="switchTab('generate')">Generate TTS</button>
   <button onclick="switchTab('compile')">Compile Volume</button>
+  <button onclick="switchTab('video')">🎬 Video Studio</button>
 </div>
 
 <div id="panel-generate" class="panel active">
@@ -167,6 +207,10 @@ textarea{resize:vertical;min-height:120px;font-family:'JetBrains Mono',ui-monosp
         <div><label>Audiobook by</label><input id="cAudiobookBy" placeholder="Your name"></div>
       </div>
       <div id="credPreview" class="cred-preview">Fill in at least author or name to generate intro.</div>
+      <div class="row">
+        <div><label>Intro Voice</label><select id="cVoice"></select></div>
+        <div><label>Intro Style</label><select id="cStyle"></select></div>
+      </div>
     </div>
 
     <div class="row" style="align-items:end;margin-top:10px">
@@ -177,17 +221,60 @@ textarea{resize:vertical;min-height:120px;font-family:'JetBrains Mono',ui-monosp
   </div>
 </div>
 
+<div id="panel-video" class="panel">
+  <div class="vs-bar">
+    <input id="videoName" placeholder="Video title...">
+    <input id="vsUpload" type="file" multiple accept="image/*,audio/*" style="display:none" onchange="uploadMedia(this.files);this.value=''">
+  </div>
+
+  <div class="row" style="align-items:center;justify-content:space-between">
+    <label>Project <span style="font-weight:400;color:#94a3b8">— each project has its own media + videos</span></label>
+    <button class="btn btn-outline" onclick="newProject()">＋ New Project</button>
+  </div>
+  <select id="vsProjectSelect" onchange="loadStudioMedia()"></select>
+
+  <div class="row" style="align-items:center;justify-content:space-between">
+    <label>Media Library <span style="font-weight:400;color:#94a3b8">— drag images to the slide track · audio to the timeline below</span></label>
+    <button class="btn btn-outline" onclick="document.getElementById('vsUpload').click()">＋ Add Media</button>
+  </div>
+  <div id="mediaLibrary" class="media-library"></div>
+
+  <label>Novel <span style="font-weight:400;color:#94a3b8">— select one to drag its audio onto the timeline</span></label>
+  <select id="vsNovelSelect" onchange="onVsNovelChange()"></select>
+  <div id="vsAudioFiles" class="media-library"></div>
+
+  <label style="margin-bottom:4px">Timeline <span style="font-weight:400;color:#94a3b8">— media on top · audio below · drag clips to adjust</span></label>
+  <div class="timeline">
+    <canvas id="waveOverview" class="wave-overview" onclick="overviewSeek(event)" title="Waveform overview — click to jump"></canvas>
+    <div class="media-row">
+      <div id="slideTrack" class="slide-track" ondragover="event.preventDefault();edgeScroll(this,event.clientX)" ondrop="dropOnTrack(event)"></div>
+    </div>
+    <div id="audioTrack" class="audio-track" ondragover="event.preventDefault();edgeScroll(this,event.clientX)" ondrop="dropOnAudioTrack(event)"></div>
+    <div class="vs-bottom-tools">
+      <button class="tool-icon-round" title="Minimize" onclick="setZoom(SCALE-20)">－</button>
+      <button class="tool-icon-round" title="Maximize" onclick="setZoom(SCALE+20)">＋</button>
+    </div>
+  </div>
+  <p id="slideCount" style="font-size:12px;color:#64748b;margin-bottom:0">0 slides</p>
+  <p id="clipCount" style="font-size:12px;color:#64748b;margin-bottom:8px">0 audio clips</p>
+
+  <button id="renderBtn" class="btn btn-amber" onclick="renderVideo()"><span class="btn-label">🎬 Render MP4</span><span class="spinner"></span></button>
+  <div id="existingVideos" style="margin-top:8px;font-size:13px;color:#64748b"></div>
+</div>
+
 <div id="log">Ready.</div>
 
 <script>
 // ── State ──
 let novels = [], settings = {};
+// Folder names store _ for spaces; show spaces in the UI
+const disp=n=>n.replace(/_/g,' ');
 
 // ── Tabs ──
 function switchTab(name) {
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.tabs button:nth-child(${name==='generate'?1:2})`).classList.add('active');
+  document.querySelector(`.tabs button:nth-child(${name==='generate'?1:name==='compile'?2:3})`).classList.add('active');
   document.getElementById(`panel-${name}`).classList.add('active');
   refresh();
 }
@@ -247,7 +334,7 @@ function updateCredPreview() {
   const tr=document.getElementById('cTranslator').value.trim();
   const ab=document.getElementById('cAudiobookBy').value.trim();
   let parts=[];
-  if(novel) parts.push(novel);
+  if(novel) parts.push(disp(novel));
   if(author) parts.push('Author: '+author);
   if(tr) parts.push('Translated by '+tr);
   if(ab) parts.push('Audiobook by '+ab);
@@ -262,17 +349,20 @@ async function refresh() {
   const res=await fetch('/api/novels');
   novels=await res.json();
   renderNovelDropdowns();renderChapterList();renderCompileList();
+  loadStudioMedia();
 }
 
 function renderNovelDropdowns() {
   const sel=document.getElementById('novelSelect');
   const cs=document.getElementById('compileNovelSelect');
   const cur=sel.value,cur2=cs.value;
-  const opts=n=>`${n.name} (${n.chapters.length} ch)`;
+  const opts=n=>`${disp(n.name)} (${n.chapters.length} ch)`;
   sel.innerHTML='<option value="">— Select a novel —</option>'+novels.map(n=>`<option value="${n.name}">${opts(n)}</option>`).join('');
   cs.innerHTML='<option value="">— Select a novel —</option>'+novels.map(n=>`<option value="${n.name}">${opts(n)}</option>`).join('');
-  if(novels.find(n=>n.name===cur)) sel.value=cur;
-  if(novels.find(n=>n.name===cur2)) cs.value=cur2;
+  const vs=document.getElementById('vsNovelSelect');
+  const cur3=vs.value;
+  vs.innerHTML='<option value="">— Select a novel —</option>'+novels.map(n=>`<option value="${n.name}">${opts(n)}</option>`).join('');
+  if(novels.find(n=>n.name===cur3)) vs.value=cur3;
   onNovelChange();onCompileNovelChange();
 }
 
@@ -282,7 +372,7 @@ async function addNovel() {
   if(!name){log('❌ Enter a novel name');return}
   await fetch('/api/novel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
   input.value='';
-  log(`📁 Novel "${name}" created`);
+  log(`📁 Novel "${disp(name)}" created`);
   await refresh();
   document.getElementById('novelSelect').value=name;
   onNovelChange();
@@ -294,7 +384,7 @@ function onNovelChange() {
   const area=document.getElementById('chaptersArea');
   if(!name){area.style.display='none';return}
   area.style.display='block';
-  document.getElementById('novelTitle').textContent='— '+name;
+  document.getElementById('novelTitle').textContent='— '+disp(name);
   renderChapterList();
 }
 
@@ -317,7 +407,7 @@ async function generateTts() {
   const style=document.getElementById('style').value;
   if(!name||!text){log('❌ Select novel + enter text');return}
   setLoading('generateBtn',true);
-  log(`⏳ Generating ch ${chapter} of "${name}"${style!=='none'?' ['+style+']':''}...`);
+  log(`⏳ Generating ch ${chapter} of "${disp(name)}"${style!=='none'?' ['+style+']':''}...`);
   try {
     const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({novel_name:name,chapter:parseInt(chapter),text,voice,style})});
     const d=await res.json();
@@ -368,13 +458,15 @@ async function compileVolume() {
   const vol=document.getElementById('volumeNum').value;
   const selected=[...document.querySelectorAll('#compileChapterList .chip.selected')].map(el=>parseInt(el.querySelector('input').value));
   if(!selected.length){log('❌ Select at least one chapter');return}
+  const voice=document.getElementById('cVoice').value;
+  const style=document.getElementById('cStyle').value;
   const author=document.getElementById('cAuthor').value.trim();
   const translator=document.getElementById('cTranslator').value.trim();
   const audiobook_by=document.getElementById('cAudiobookBy').value.trim();
   setLoading('compileBtn',true);
   log(`⏳ Compiling ${selected.length} chapters → AAC volume ${vol}...`);
   try {
-    const res=await fetch('/api/compile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({novel_name:name,chapters:selected,volume_number:parseInt(vol),author,translator,audiobook_by})});
+    const res=await fetch('/api/compile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({novel_name:name,chapters:selected,volume_number:parseInt(vol),voice,style,author,translator,audiobook_by})});
     const d=await res.json();
     if(d.ok){log(`✅ Volume ${vol} saved`);await refresh()}
     else log(`❌ ${d.error}`);
@@ -385,7 +477,413 @@ async function compileVolume() {
   }
 }
 
+// ── Video Studio ──
+let slides=[],audioClips=[],vsMedia=null,dragData=null;
+let SCALE=40; // px per second on the timeline (zoomable)
+const HZ=()=>Math.max(.6,Math.min(2,SCALE/40)); // track-height factor driven by the zoom buttons
+
+function dragStart(e,name,kind,idx){
+  dragData={name,kind,idx:idx===undefined?null:idx};
+  e.dataTransfer.effectAllowed='move';
+}
+
+// auto-scroll a track when a drag hovers near its horizontal edges
+function edgeScroll(track,x){
+  const r=track.getBoundingClientRect();
+  if(x<r.left+40)track.scrollLeft-=10;
+  else if(x>r.right-40)track.scrollLeft+=10;
+}
+
+function setZoom(v){
+  SCALE=Math.max(10,Math.min(160,v));
+  renderSlides();renderAudioTrack();
+}
+
+function dropOnTrack(e,idx){
+  e.preventDefault();
+  if(!dragData)return;
+  if(dragData.kind==='image'){
+    const card=e.target.closest('.slide-card');
+    if(card){const r=card.getBoundingClientRect();if(e.clientX>r.left+r.width/2)idx++}
+    addSlide(dragData.name,idx);
+  }
+  else if(dragData.kind==='slide'&&dragData.idx!==null)moveSlide(dragData.idx,idx);
+  dragData=null;
+}
+
+function addSlide(image,idx){
+  const s={image,duration:3,transition:'none'};
+  if(idx===null||idx===undefined||idx>=slides.length)slides.push(s);
+  else slides.splice(idx,0,s);
+  renderSlides();renderAudioTrack();
+}
+
+function moveSlide(from,idx){
+  const [s]=slides.splice(from,1);
+  if(idx===null||idx===undefined)idx=slides.length;
+  if(from<idx)idx--;
+  idx=Math.max(0,Math.min(slides.length,idx));
+  slides.splice(idx,0,s);
+  renderSlides();renderAudioTrack();
+}
+
+function renderSlides(){
+  const el=document.getElementById('slideTrack');
+  el.style.backgroundImage=`repeating-linear-gradient(to right,#334155 0 1px,transparent 1px ${SCALE}px)`;
+  document.getElementById('slideCount').textContent=slides.length+' slide'+(slides.length===1?'':'s');
+  const starts=slideStartTimes();
+  const cards=slides.map((s,i)=>`
+    <div class="slide-card" data-idx="${i}" style="left:${starts[i]*SCALE}px;width:${Math.max(0.5,s.duration||3)*SCALE}px" draggable="true" ondragstart="dragStart(event,'${s.image}','slide',${i})" ondragover="event.preventDefault()" ondrop="dropOnTrack(event,${i})">
+      <div class="slide-thumb" style="background-image:url('/api/media/${encodeURIComponent(s.image)}')" title="${s.image}"></div>
+      <span class="slide-dur">${s.duration}s</span>
+      <button class="slide-x" onclick="event.stopPropagation();slides.splice(${i},1);renderSlides();renderAudioTrack()">✕</button>
+      <div class="edge-handle" onpointerdown="slideEdgeDrag(event,${i})" title="Drag right → longer, left → shorter"></div>
+    </div>
+  `).join('');
+  const picks=slides.slice(1).map((s,i)=>{
+    const idx=i+1;
+    const trans=s.transition==='none'?0.04:0.5;
+    const x=(starts[idx]-trans/2)*SCALE-32;
+    return `<select class="trans-pick" style="left:${x}px" onchange="slides[${idx}].transition=this.value;renderSlides();renderAudioTrack()" title="Transition into slide ${idx+1}">
+      <option value="none"${s.transition==='none'?' selected':''}>Cut</option>
+      <option value="fade"${s.transition==='fade'?' selected':''}>Fade</option>
+      <option value="slide"${s.transition==='slide'?' selected':''}>Slide</option>
+      <option value="wipe"${s.transition==='wipe'?' selected':''}>Wipe</option>
+    </select>`;
+  }).join('');
+  el.innerHTML=cards+picks||'<div class="empty-state">Drag images here</div>';
+}
+
+function slideEdgeDrag(e,i){
+  e.preventDefault();
+  e.stopPropagation();
+  const card=e.currentTarget.parentElement;
+  const trackEl=document.getElementById('slideTrack');
+  const track=trackEl.getBoundingClientRect();
+  const blockLeft=parseFloat(card.style.left);
+  card.draggable=false;
+  card.setPointerCapture(e.pointerId);
+  const move=ev=>{
+    edgeScroll(trackEl,ev.clientX);
+    const d=Math.max(0.5,(ev.clientX-track.left+trackEl.scrollLeft-blockLeft)/SCALE);
+    slides[i].duration=Math.round(d*10)/10;
+    const st=slideStartTimes();
+    document.querySelectorAll('#slideTrack .slide-card').forEach(b=>{
+      const j=+b.dataset.idx;
+      b.style.left=(st[j]*SCALE)+'px';
+      if(j===i)b.style.width=(Math.max(0.5,slides[i].duration)*SCALE)+'px';
+    });
+  };
+  const up=()=>{
+    try{card.releasePointerCapture(e.pointerId)}catch(err){}
+    card.draggable=true;
+    card.removeEventListener('pointermove',move);
+    card.removeEventListener('pointerup',up);
+    renderSlides();renderAudioTrack();
+  };
+  card.addEventListener('pointermove',move);
+  card.addEventListener('pointerup',up);
+}
+
+function onVsNovelChange(){
+  const name=document.getElementById('vsNovelSelect').value;
+  const el=document.getElementById('vsAudioFiles');
+  if(!name){el.innerHTML='<div class="empty-state">Select a novel to see its audio</div>';return}
+  const items=((vsMedia&&vsMedia.novel_audio)||[]).filter(a=>a.novel===name);
+  el.innerHTML=items.map(a=>`
+    <label class="chip" draggable="true" ondragstart="dragStart(event,'${a.path}','audio')">
+      <span>🎵 ${a.label} (${a.kind==='flac'?'FLAC':'vol'})</span>
+    </label>
+  `).join('')||'<div class="empty-state">No audio in this novel yet</div>';
+}
+
+function dropOnAudioTrack(e){
+  e.preventDefault();
+  if(!dragData||dragData.kind!=='audio'){dragData=null;return}
+  const trackEl=document.getElementById('audioTrack');
+  const start=Math.max(0,Math.round((e.clientX-trackEl.getBoundingClientRect().left-1+trackEl.scrollLeft)/SCALE*10)/10);
+  addAudioClip(dragData.name,start);
+  dragData=null;
+}
+
+async function addAudioClip(file,start){
+  let dur=0;
+  try{
+    const res=await fetch('/api/media-duration?path='+encodeURIComponent(file));
+    const d=await res.json();
+    if(d.ok)dur=d.duration;
+  }catch(e){}
+  audioClips.push({file,start,dur});
+  renderAudioTrack();
+}
+
+function slideStartTimes(){
+  if(!slides.length)return[];
+  const durs=slides.map(s=>Math.max(0.5,s.duration||3));
+  const trans=[0].concat(slides.slice(1).map(s=>s.transition==='none'?0.04:0.5));
+  const seg=durs.map((d,i)=>d+trans[i]+(i+1<trans.length?trans[i+1]:0));
+  const out=[0];
+  let C=seg[0];
+  for(let i=1;i<durs.length;i++){
+    out.push(Math.round((C-trans[i])*10)/10);
+    C=C+seg[i]-trans[i];
+  }
+  return out;
+}
+
+function renderAudioTrack(){
+  const el=document.getElementById('audioTrack');
+  el.style.backgroundImage=`repeating-linear-gradient(to right,#334155 0 1px,transparent 1px ${SCALE}px)`;
+  document.querySelector('.timeline').style.setProperty('--hz',HZ());
+  document.getElementById('clipCount').textContent=audioClips.length+' audio clip'+(audioClips.length===1?'':'s');
+  const laneEnds=[];
+  const laneOf=audioClips.map(c=>{
+    let L=laneEnds.findIndex(end=>end<=c.start+0.001);
+    if(L===-1){L=laneEnds.length;laneEnds.push(0)}
+    laneEnds[L]=c.start+(c.dur||0);
+    return L;
+  });
+  el.style.height=(6+Math.max(1,laneEnds.length)*44*HZ())+'px';
+  const markers=slideStartTimes().map((st,i)=>`<div class="slide-marker" style="left:${st*SCALE}px"><span>Slide ${i+1} @ ${st}s</span></div>`).join('');
+  const clips=audioClips.map((c,i)=>{
+    const w=Math.max(60,c.dur*SCALE);
+    return `
+    <div class="audio-clip" style="left:${c.start*SCALE}px;width:${w}px;top:${2+laneOf[i]*44*HZ()}px" onpointerdown="clipDragStart(event,${i})">
+      <canvas class="wave" data-file="${c.file}"></canvas>
+      <div class="clip-info"><span class="clip-name">🎵 ${c.file}</span><span class="clip-time">${c.start}s · ${c.dur?c.dur+'s':'?'}</span></div>
+      <input class="clip-vol" type="range" min="0" max="2" step="0.1" value="${c.volume==null?1:c.volume}" oninput="audioClips[${i}].volume=parseFloat(this.value)" title="Volume">
+      ${c.fadeIn?`<div class="fade-overlay in" style="width:${Math.min(c.fadeIn*SCALE,w)}px"></div>`:''}
+      ${c.fadeOut?`<div class="fade-overlay out" style="width:${Math.min(c.fadeOut*SCALE,w)}px"></div>`:''}
+      <div class="fade-handle fh-in" onpointerdown="fadeDrag(event,${i},'fadeIn')" title="Drag right → fade in"></div>
+      <div class="fade-handle fh-out" onpointerdown="fadeDrag(event,${i},'fadeOut')" title="Drag left → fade out"></div>
+      <button class="clip-x" onclick="event.stopPropagation();audioClips.splice(${i},1);renderAudioTrack()">✕</button>
+    </div>`;
+  }).join('');
+  el.innerHTML=markers+clips||'<div class="empty-state">Drag audio here</div>';
+  // wait a frame so canvases have real layout dimensions before we measure/paint them
+  requestAnimationFrame(()=>{
+    el.querySelectorAll('.wave').forEach(cv=>{
+      cv.width=cv.clientWidth||54;
+      cv.height=cv.clientHeight||30;
+      drawWave(cv,cv.dataset.file);
+    });
+    drawOverview();
+  });
+}
+
+function timelineTotal(){
+  const ss=slideStartTimes();
+  const slideEnd=ss.length?ss[ss.length-1]+Math.max(.5,slides[slides.length-1].duration||3):0;
+  return Math.max(1,...audioClips.map(c=>c.start+(c.dur||0)),slideEnd);
+}
+
+// ponytail: minimap — peaks reuse waveCache, so a clip shows up here only
+// after its clip canvas fetched and cached its peaks
+function drawOverview(){
+  const cv=document.getElementById('waveOverview');
+  if(!cv)return;
+  cv.style.display=audioClips.length?'block':'none';
+  if(!audioClips.length)return;
+  cv.width=cv.clientWidth||600;cv.height=cv.clientHeight||40;
+  const c2d=cv.getContext('2d'),W=cv.width,H=cv.height,total=timelineTotal();
+  c2d.clearRect(0,0,W,H);
+  c2d.fillStyle='rgba(255,255,255,.22)';
+  slideStartTimes().forEach(st=>c2d.fillRect(st/total*W,0,1,H));
+  audioClips.forEach(c=>{
+    const peaks=waveCache[c.file];if(!peaks)return;
+    const x0=c.start/total*W,w=Math.max(1,(c.start+(c.dur||0))/total*W-x0);
+    c2d.fillStyle='rgba(96,165,250,.85)';
+    for(let x=0;x<w;x++){
+      const p=peaks[Math.floor(x/w*peaks.length)];if(!p)continue;
+      c2d.fillRect(x0+x,(1+p[0])/2*H,1,Math.max(1,(p[1]-p[0])/2*H));
+    }
+  });
+}
+
+function overviewSeek(e){
+  const cv=document.getElementById('waveOverview');
+  const px=(e.clientX-cv.getBoundingClientRect().left)/cv.width*timelineTotal()*SCALE;
+  document.getElementById('audioTrack').scrollLeft=px;
+  document.getElementById('slideTrack').scrollLeft=px;
+}
+
+function clipDragStart(e,idx){
+  if(e.target.closest('.clip-x,.clip-vol,.fade-handle'))return;
+  const clip=audioClips[idx];
+  const el=e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+  el.classList.add('dragging');
+  const move=ev=>{
+    const trackEl=document.getElementById('audioTrack');
+    edgeScroll(trackEl,ev.clientX);
+    const track=trackEl.getBoundingClientRect();
+    const t=Math.max(0,(ev.clientX-track.left-1+trackEl.scrollLeft)/SCALE);
+    el.style.left=(t*SCALE)+'px';
+    el._t=t;
+  };
+  const up=()=>{
+    try{el.releasePointerCapture(e.pointerId)}catch(err){}
+    el.classList.remove('dragging');
+    el.removeEventListener('pointermove',move);
+    el.removeEventListener('pointerup',up);
+    if(el._t!==undefined){
+      clip.start=Math.round(el._t*10)/10;
+      delete el._t;
+      renderAudioTrack();
+    }
+  };
+  el.addEventListener('pointermove',move);
+  el.addEventListener('pointerup',up);
+}
+
+function fadeDrag(e,idx,which){
+  e.preventDefault();
+  e.stopPropagation();
+  const clip=audioClips[idx];
+  const el=e.currentTarget;
+  const startX=e.clientX,startVal=clip[which]||0;
+  el.setPointerCapture(e.pointerId);
+  const move=ev=>{
+    const raw=startVal+(which==='fadeIn'?1:-1)*(ev.clientX-startX)/SCALE;
+    clip[which]=Math.max(0,Math.round(raw*10)/10);
+    const ov=el.parentElement.querySelector(which==='fadeIn'?'.fade-overlay.in':'.fade-overlay.out');
+    if(ov)ov.style.width=Math.min(clip[which]*SCALE,parseFloat(el.parentElement.style.width))+'px';
+  };
+  const up=()=>{
+    try{el.releasePointerCapture(e.pointerId)}catch(err){}
+    el.removeEventListener('pointermove',move);
+    el.removeEventListener('pointerup',up);
+    renderAudioTrack();
+  };
+  el.addEventListener('pointermove',move);
+  el.addEventListener('pointerup',up);
+}
+
+// ── Waveform rendering ──
+// One shared AudioContext, reused across every clip (creating/closing a new
+// one per drop is unreliable and was causing silent decode failures).
+const waveCache={};
+let sharedCtx=null;
+function getCtx(){
+  if(!sharedCtx||sharedCtx.state==='closed'){
+    sharedCtx=new (window.AudioContext||window.webkitAudioContext)();
+  }
+  return sharedCtx;
+}
+
+async function drawWave(cv,file){
+  let peaks=waveCache[file];
+  if(peaks===undefined){
+    try{
+      const res=await fetch('/api/audio-file?path='+encodeURIComponent(file));
+      if(!res.ok) throw new Error('fetch '+res.status);
+      const buf=await res.arrayBuffer();
+      const audio=await getCtx().decodeAudioData(buf);
+      const raw=audio.getChannelData(0);
+      const N=600;const p=[];
+      for(let x=0;x<N;x++){
+        let min=1,max=-1;
+        const a=Math.floor(x*raw.length/N),b=Math.floor((x+1)*raw.length/N);
+        for(let i=a;i<b;i+=32){const v=raw[i];if(v<min)min=v;if(v>max)max=v}
+        p.push([min,max]);
+      }
+      peaks=p;
+      waveCache[file]=peaks;
+      drawOverview();
+    }catch(e){
+      console.error('waveform failed for',file,e);
+      log(`⚠️ Couldn't render waveform for ${file}: ${e.message}`);
+      peaks=null;
+      waveCache[file]=null; // cache the failure so we don't retry-loop forever
+    }
+  }
+  const c2d=cv.getContext('2d'),w=cv.width,h=cv.height;
+  c2d.clearRect(0,0,w,h);
+  if(!peaks){
+    // visible fallback so a failed waveform doesn't look identical to "still loading"
+    c2d.strokeStyle='rgba(255,255,255,.35)';
+    c2d.beginPath();c2d.moveTo(0,h/2);c2d.lineTo(w,h/2);c2d.stroke();
+    return;
+  }
+  c2d.fillStyle='rgba(255,255,255,.65)';
+  for(let x=0;x<w;x++){
+    const p=peaks[Math.floor(x/w*peaks.length)];
+    if(!p)continue;
+    c2d.fillRect(x,(1+p[0])/2*h,1,Math.max(1,(p[1]-p[0])/2*h));
+  }
+}
+
+async function loadStudioMedia(){
+  try{
+    const res=await fetch('/api/studio-media');
+    const m=await res.json();
+    vsMedia=m;
+    const sel=document.getElementById('vsProjectSelect');
+    const cur=sel.value;
+    sel.innerHTML=(m.projects||[]).map(p=>`<option value="${p}">${disp(p)}</option>`).join('')||'<option value="">No projects — create one</option>';
+    if((m.projects||[]).includes(cur))sel.value=cur;
+    const p=sel.value;
+    const lib=(m.library||{})[p]||{images:[],audio:[]};
+    const flat=m.flat||{images:[],audio:[]};
+    const ref=f=>p?`${p}/Media/${f}`:f;
+    document.getElementById('mediaLibrary').innerHTML=
+      lib.images.map(f=>`<img class="media-thumb" src="/api/media/${encodeURIComponent(ref(f))}" draggable="true" ondragstart="dragStart(event,'${ref(f)}','image')" title="${f}">`).join('')+
+      lib.audio.map(f=>`<label class="chip" draggable="true" ondragstart="dragStart(event,'${ref(f)}','audio')"><span>🎵 ${f}</span></label>`).join('')+
+      (flat.images.length||flat.audio.length?`<div class="media-group"><div class="media-group-label">📁 Other uploads</div><div class="media-library">${flat.images.map(f=>`<img class="media-thumb" src="/api/media/${encodeURIComponent(f)}" draggable="true" ondragstart="dragStart(event,'${f}','image')" title="${f}">`).join('')+flat.audio.map(f=>`<label class="chip" draggable="true" ondragstart="dragStart(event,'${f}','audio')"><span>🎵 ${f}</span></label>`).join('')}</div></div>`:'')
+      ||'<div class="empty-state">No media yet — use ＋ Add Media</div>';
+    const vids=(m.videos||{})[p]||[];
+    document.getElementById('existingVideos').textContent=vids.length?'📚 Videos: '+vids.join(', '):'No videos yet';
+  }catch(e){}
+}
+
+async function newProject(){
+  const name=prompt('Project name:');
+  if(!name)return;
+  try{
+    const res=await fetch('/api/studio-project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
+    const d=await res.json();
+    if(d.ok){log(`✅ Project "${disp(d.project)}" created`);await loadStudioMedia();document.getElementById('vsProjectSelect').value=d.project}
+    else log(`❌ ${d.error}`);
+  }catch(e){log(`❌ Network error: ${e.message}`)}
+}
+
+async function uploadMedia(files){
+  if(!files||!files.length)return;
+  for(const f of files){
+    const fd=new FormData();
+    fd.append('file',f);
+    fd.append('project',document.getElementById('vsProjectSelect').value);
+    log(`⏳ Uploading ${f.name}...`);
+    try{
+      const res=await fetch('/api/upload',{method:'POST',body:fd});
+      const d=await res.json();
+      d.ok?log(`✅ ${f.name} uploaded`):log(`❌ ${d.error}`);
+    }catch(e){log(`❌ Network error: ${e.message}`)}
+  }
+  await loadStudioMedia();
+}
+
+async function renderVideo(){
+  const name=document.getElementById('videoName').value.trim();
+  if(!name){log('❌ Enter a video title');return}
+  if(!slides.length){log('❌ Drag at least one image onto the track');return}
+  if(!audioClips.length){log('❌ Drag at least one audio clip onto the audio track');return}
+  setLoading('renderBtn',true);
+  log(`⏳ Rendering "${name}" — ${slides.length} slides → MP4...`);
+  try{
+    const res=await fetch('/api/render-video',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,slides,audio_clips:audioClips,project:document.getElementById('vsProjectSelect').value})});
+    const d=await res.json();
+    if(d.ok){log(`✅ Video saved: <a href="/api/media/${encodeURIComponent(d.path||d.name)}" target="_blank">${d.name}</a>`);await loadStudioMedia()}
+    else log(`❌ ${d.error}`);
+  }catch(e){log(`❌ Network error: ${e.message}`)}
+  finally{setLoading('renderBtn',false)}
+}
+
 // ── Init ──
+document.getElementById('cVoice').innerHTML=document.getElementById('voice').innerHTML;
+document.getElementById('cStyle').innerHTML=document.getElementById('style').innerHTML;
+renderSlides();
+renderAudioTrack();
 loadSettings();
 refresh();
 </script>

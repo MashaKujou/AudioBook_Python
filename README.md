@@ -59,6 +59,8 @@ TTS/
 │   └── {novel_name}/
 │       ├── chapters/       # 0001.flac, 0002.flac, ... (per-chapter FLAC)
 │       └── volumes/        # {novel}_vol1.aac (compiled audiobooks)
+│   └── _studio/            # Video Studio: uploads + rendered MP4s
+│       └── media/          # {Project}/Media (uploads) + {Project}/Videos (renders)
 └── README.md
 ```
 
@@ -70,7 +72,13 @@ TTS/
 | `GET` | `/api/novels` | Lists all novels with chapters and volumes |
 | `POST` | `/api/novel` | Creates a new novel (`{"name": "..."}`) |
 | `POST` | `/api/generate` | Runs TTS on text → FLAC (`novel_name`, `chapter`, `text`, `voice`, `style`) |
-| `POST` | `/api/compile` | Compiles FLACs + intro → AAC (`novel_name`, `chapters[]`, `author`, `translator`, `audiobook_by`) |
+| `POST` | `/api/compile` | Compiles FLACs + intro → AAC (`novel_name`, `chapters[]`, `voice`, `style`, `author`, `translator`, `audiobook_by`) |
+| `POST` | `/api/upload` | Uploads Video Studio media (multipart `file`, `project`) |
+| `POST` | `/api/studio-project` | Creates a project folder (`{"name": "..."}` → `media/{Project}/Media` + `Videos`) |
+| `GET` | `/api/studio-media` | Lists projects with their own media files and rendered videos |
+| `GET` | `/api/media/<name>` | Serves a media file inline (thumbnails, playback) |
+| `GET` | `/api/media-duration` | Returns an audio file's duration in seconds (`?path=...`) |
+| `POST` | `/api/render-video` | Renders slides + audio clips → MP4 (`name`, `project`, `slides[{image, duration, transition}]`, `audio_clips[{file, start, fadeIn, fadeOut, volume}]`) |
 | `GET` | `/api/download` | Downloads a file (`?path=storage/...`) |
 | `GET` | `/api/settings` | Returns saved credits defaults |
 | `PUT` | `/api/settings` | Saves credits defaults |
@@ -90,6 +98,10 @@ No manual config needed. The app creates `config.json` at first settings save vi
   "audiobook_by": ""
 }
 ```
+
+## Video Studio
+
+Third tab. Create a project (＋ New Project → `storage/_studio/media/{Project}/Media` + `Videos`), upload images + audio into it, and drag them onto the timeline. One dark timeline container, media row on top and audio row below: drag images onto the media row (drag a card's right edge to resize its duration; the dropdown between cards picks the transition: Cut / Fade / Slide / Wipe) and drag audio onto the audio row (hold and drag clips to reposition; corner handles set fade-in/out; a slider sets per-clip volume; overlapping clips stack into lanes). Waveforms and slide-boundary markers keep everything scannable. Render builds one MP4 (H.264, 1920×1080, 30fps) into the project's `Videos` folder.
 
 ## Notes
 
